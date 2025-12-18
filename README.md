@@ -14,10 +14,10 @@ Bot do Discord que monitora e notifica sobre novas CVEs (Common Vulnerabilities 
 
 ## 📋 Pré-requisitos
 
-- Python 3.11+
-- Docker (para containerização)
+- Python 3.11
 - Token de bot do Discord
 - ID do canal do Discord onde as notificações serão enviadas
+- Docker (opcional, para containerização local)
 
 ## 🔧 Configuração Local
 
@@ -54,13 +54,15 @@ docker run -d --name nist-bot --env-file .env nist-discord-bot
 ### Deploy no DigitalOcean App Platform:
 
 1. Faça push do código para o GitHub
-2. No DigitalOcean, crie um novo App
+2. No DigitalOcean, crie um novo App como **Web Service**
 3. Conecte ao repositório GitHub
 4. Configure as variáveis de ambiente no painel do DigitalOcean:
    - `DISCORD_TOKEN`
    - `DISCORD_CHANNEL_ID`
    - `NVD_API_KEY` (opcional)
-5. O DigitalOcean detectará automaticamente o Dockerfile e fará o deploy
+   - `PORT` (já configurado automaticamente como 8080)
+5. O DigitalOcean detectará automaticamente o buildpack Python e fará o deploy
+6. O bot inclui um servidor HTTP na porta 8080 para health checks
 
 ## 🔐 Variáveis de Ambiente
 
@@ -73,11 +75,12 @@ docker run -d --name nist-bot --env-file .env nist-discord-bot
 ## 📊 Como Funciona
 
 1. O bot se conecta ao Discord
-2. A cada 10 minutos, consulta a API do NIST NVD
-3. Busca CVEs publicadas no dia atual (UTC)
-4. Compara com o último ID processado (`last_cve.txt`)
-5. Envia notificações apenas de CVEs novas
-6. Atualiza o arquivo de persistência
+2. Inicia um servidor HTTP na porta 8080 para health checks (DigitalOcean)
+3. A cada 10 minutos, consulta a API do NIST NVD
+4. Busca CVEs publicadas no dia atual (UTC)
+5. Compara com o último ID processado (`last_cve.txt`)
+6. Envia notificações apenas de CVEs novas
+7. Atualiza o arquivo de persistência
 
 ## 🎨 Classificação de Severidade
 

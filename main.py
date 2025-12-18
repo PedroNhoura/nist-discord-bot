@@ -6,6 +6,7 @@ import logging
 import json
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
+from aiohttp import web
 
 # Configuração de Logging
 logging.basicConfig(
@@ -41,6 +42,7 @@ class CVEBot(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.bg_task = None
+        self.web_server = None
 
     async def on_ready(self):
         logger.info(f'Bot conectado como {self.user} (ID: {self.user.id})')
@@ -48,6 +50,11 @@ class CVEBot(discord.Client):
         if self.bg_task is None:
             self.bg_task = self.loop.create_task(self.monitor_cves_task())
             logger.info("Tarefa de monitoramento de CVEs iniciada.")
+        
+        # Inicia o servidor HTTP para health check do DigitalOcean
+        if self.web_server is None:
+            self.web_server = self.loop.create_task(self.start_health_server())
+            logger.info("Servidor HTTP de health check iniciado.")
 
     async def monitor_cves_task(self):
         """Loop principal de monitoramento."""
@@ -252,6 +259,28 @@ class CVEBot(discord.Client):
         embed.set_thumbnail(url="https://i.imgur.com/QfZQsBr.png")
         
         return embed
+
+    async def start_health_server(self):
+        """Inicia um servidor HTTP simples para health check do DigitalOcean."""
+        async def health_check(request):
+            return web.Response(text="OK", status=200)
+        
+        async def root_handler(request):
+            return web.Response(
+                text="NIST Discord Bot - Brazukas Hacking Club\nStatus: Running",
+                status=200
+            )
+        
+        app = web.Application()
+        app.router.add_get('/', root_handler)
+        app.router.add_get('/health', health_check)
+        
+        port = int(os.getenv('PORT', 8080))
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, '0.0.0.0', port)
+        await site.start()
+        logger.info(f"Servidor HTTP rodando na porta {port}")
 
 if __name__ == '__main__':
     intents = discord.Intents.default()

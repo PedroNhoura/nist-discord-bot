@@ -26,10 +26,10 @@ git push origin main
 **Configurações Importantes:**
 
 - **Name**: `nist-discord-bot`
-- **Resource Type**: Web Service
+- **Resource Type**: Web Service ⚠️ IMPORTANTE: Deve ser Web Service, não Worker
 - **Instance Size**: apps-s-1vcpu-1gb-fixed ($10/mo)
-- **Build Strategy**: Dockerfile (será detectado automaticamente)
-- **HTTP Port**: 8080
+- **Build Strategy**: Buildpack (Python) - detectado automaticamente
+- **HTTP Port**: 8080 (já configurado automaticamente)
 - **Region**: ATL1 (Atlanta) ou o mais próximo dos usuários
 
 ### 4️⃣ Variáveis de Ambiente ⚠️ CRÍTICO
@@ -81,9 +81,19 @@ Após o deploy, verifique:
 - ✅ Verifique os logs de runtime
 
 ### Build falha
-- ✅ Verifique se o Dockerfile está no root do repositório
-- ✅ Confirme que `requirements.txt` está presente
+- ✅ Verifique se `requirements.txt` está presente
+- ✅ Confirme que `.python-version` e `Procfile` estão no root
 - ✅ Veja os build logs para detalhes
+
+### "No default process type" ou "determine start command"
+- ✅ Confirme que o arquivo `Procfile` existe no root do repositório
+- ✅ Verifique que o Procfile contém: `web: python main.py`
+- ✅ Certifique-se de que commitou o Procfile: `git add Procfile && git commit`
+
+### "Readiness probe failed" ou "connection refused"
+- ✅ O bot agora inclui um servidor HTTP na porta 8080
+- ✅ Verifique os logs de runtime para confirmar: "Servidor HTTP rodando na porta 8080"
+- ✅ O health check está disponível em `/health`
 
 ## 📊 Monitoramento
 

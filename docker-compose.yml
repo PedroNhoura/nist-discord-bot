@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  nist-bot:
+    build: .
+    container_name: nist-discord-bot
+    restart: unless-stopped
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
+      - NVD_API_KEY=${NVD_API_KEY}
+      - PORT=8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./last_cve.txt:/app/last_cve.txt
+    networks:
+      - discord-bots-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Adicione novos bots aqui no futuro:
+  # outro-bot:
+  #   build: ../outro-bot
+  #   container_name: outro-bot
+  #   restart: unless-stopped
+  #   environment:
+  #     - DISCORD_TOKEN=${OUTRO_TOKEN}
+  #   networks:
+  #     - discord-bots-network
+
+networks:
+  discord-bots-network:
+    driver: bridge
+
+volumes:
+  cve-data:
+    driver: local

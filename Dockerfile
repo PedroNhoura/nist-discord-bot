@@ -1,6 +1,11 @@
 # Use uma imagem Python oficial como base
 FROM python:3.11-slim
 
+# Instala curl para health checks
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # Define o diretório de trabalho dentro do container
 WORKDIR /app
 

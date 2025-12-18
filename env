@@ -1,0 +1,4 @@
+DISCORD_TOKEN=KEY
+DISCORD_CHANNEL_ID=KEY
+# Opcional: Chave de API do NVD para aumentar o limite de taxa
+# NVD_API_KEY=sua_chave_nvd_aqui
